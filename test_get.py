@@ -7,25 +7,28 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_URL = 'https://api.telegram.org/bot'
+API_dogS_URL = 'https://api.thedogapi.com/v1/images/search'
+API_DOGS_URL = 'https://random.dog/woof.json'
 BOT_TOKEN = os.getenv('TG_TOKEN')
-TEXT = 'Ура! Классный апдейт!'
-MAX_COUNTER = 100
+ERROR_TEXT = 'Здесь должна была быть картинка с котиком :('
 
 offset = -2
-counter = 0
-chat_id: int
+timeout = 100
+updates: dict
 
-while counter < MAX_COUNTER:
 
-    print('attempt =', counter)  # Чтобы видеть в консоли, что код живет
+def do_something() -> None:
+    print('Был апдейт')
 
-    updates = requests.get(f'{API_URL}{BOT_TOKEN}/getUpdates?offset={offset + 1}').json()
+
+while True:
+    start_time = time.time()
+    updates = requests.get(f'{API_URL}{BOT_TOKEN}/getUpdates?offset={offset + 1}&timeout={timeout}').json()
 
     if updates['result']:
         for result in updates['result']:
             offset = result['update_id']
-            chat_id = result['message']['from']['id']
-            requests.get(f'{API_URL}{BOT_TOKEN}/sendMessage?chat_id={chat_id}&text={TEXT}')
+            do_something()
 
-    time.sleep(1)
-    counter += 1
+    end_time = time.time()
+    print(f'Время между запросами к Telegram Bot API: {end_time - start_time}')
