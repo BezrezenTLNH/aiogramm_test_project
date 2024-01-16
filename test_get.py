@@ -1,34 +1,45 @@
 import os
-import time
 
-import requests
+from aiogram import Bot, Dispatcher
+from aiogram.filters import Command
+from aiogram.types import Message
 from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = 'https://api.telegram.org/bot'
-API_dogS_URL = 'https://api.thedogapi.com/v1/images/search'
-API_DOGS_URL = 'https://random.dog/woof.json'
 BOT_TOKEN = os.getenv('TG_TOKEN')
-ERROR_TEXT = 'Здесь должна была быть картинка с котиком :('
 
-offset = -2
-timeout = 100
-updates: dict
-
-
-def do_something() -> None:
-    print('Был апдейт')
+# Create a bot and dispatcher objects
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
 
 
-while True:
-    start_time = time.time()
-    updates = requests.get(f'{API_URL}{BOT_TOKEN}/getUpdates?offset={offset + 1}&timeout={timeout}').json()
+# This handler will raise on command "/start"
+@dp.message(Command(commands=["start"]))
+async def process_start_command(message: Message):
+    await message.answer('Hello!\nMy name is Echo-Bot!\nSend me something')
 
-    if updates['result']:
-        for result in updates['result']:
-            offset = result['update_id']
-            do_something()
+    # If you want to send message for any other chats of for some contacts you should use:
+    # await bot.send_message(chat_id='ID or chat name', text='Some text')
+    # To the same chat:
+    # await bot.send_message(message.chat.id, message.text)
 
-    end_time = time.time()
-    print(f'Время между запросами к Telegram Bot API: {end_time - start_time}')
+
+# This handler will raise on command "/help"
+@dp.message(Command(commands=['help']))
+async def process_help_command(message: Message):
+    await message.answer(
+        'Send me something and as my answer'
+        'I will send your message to you'
+    )
+
+
+# This handler will raise on any of your text messages,
+# exclude commands "/start" и "/help"
+@dp.message()
+async def send_echo(message: Message):
+    await message.reply(text=message.text)
+
+
+if __name__ == '__main__':
+    dp.run_polling(bot)
