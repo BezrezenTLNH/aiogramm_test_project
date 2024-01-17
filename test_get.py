@@ -1,7 +1,9 @@
 import os
 
 from aiogram import Bot, Dispatcher
+from aiogram import F
 from aiogram.filters import Command
+from aiogram.types import ContentType
 from aiogram.types import Message
 from dotenv import load_dotenv
 
@@ -38,7 +40,30 @@ async def process_help_command(message: Message):
 # exclude commands "/start" и "/help"
 @dp.message()
 async def send_echo(message: Message):
-    await message.reply(text=message.text)
+    try:
+        await message.send_copy(chat_id=message.chat.id)
+    except TypeError:
+        await message.reply(
+            text='That type of update not allowed'
+                 'by method send_copy'
+        )
+
+# Make a flag with necessary file type as filter
+# @dp.message(F.voice)
+# async def process_sent_voice(message: Message):
+#     # print update to terminal
+#     print(message)
+#     # Send message to chat, that we receive a  voice message
+#     await message.answer(text='You sent a voice message!')
+
+
+# # Make decorator without filters to catch most types of updates
+# @dp.message()
+# async def process_any_update(message: Message):
+#     # Print update to terminal
+#     print(message)
+#     # Send message to chat, that we receive an update
+#     await message.answer(text='You sent something')
 
 
 if __name__ == '__main__':
