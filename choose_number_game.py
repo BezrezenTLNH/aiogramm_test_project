@@ -72,7 +72,7 @@ async def process_cancel_command(message: Message):
     else:
         await message.answer(
             "We're not playing at this time. "
-            "Lets start?"
+            "Let's start?"
         )
 
 
@@ -97,7 +97,7 @@ async def process_positive_answer(message: Message):
 
 
 # This handler will trigger if the user refuses to play the game
-@dp.message(F.text.lower().in_(['нет', 'не', 'не хочу', 'не буду']))
+@dp.message(F.text.lower().in_(['no', 'not', 'nope', "don't want"]))
 async def process_negative_answer(message: Message):
     if not user['in_game']:
         await message.answer(
@@ -110,3 +110,53 @@ async def process_negative_answer(message: Message):
             "send numbers from 1 to 100"
         )
 
+
+# This handler will trigger on messages with number from 1 to 100 that user will send
+@dp.message(lambda x: x.text and x.text.isdigit() and 1 <= int(x.text) <= 100)
+async def process_numbers_answer(message: Message):
+    if user['in_game']:
+        if int(message.text) == user['secret_number']:
+            user['in_game'] = False
+            user['total_games'] += 1
+            user['wins'] += 1
+            await message.answer(
+                "Yay!!! You're right!\n\n"
+                "Let's play again?"
+            )
+        elif int(message.text) > user['secret_number']:
+            user['attempts'] -= 1
+            await message.answer('My number is lower')
+        elif int(message.text) < user['secret_number']:
+            user['attempts'] -= 1
+            await message.answer('My number is bigger')
+
+        if user['attempts'] == 0:
+            user['in_game'] = False
+            user['total_games'] += 1
+            await message.answer(
+                f"Unfortunately, you have no more "
+                f"attempts. You lost :(\n\nMy number "
+                f"was {user['secret_number']}\n\nLet's "
+                f'play again?'
+            )
+    else:
+        await message.answer("We're not playing yet. Want to play?")
+
+
+# This handler will trigger by other messages
+@dp.message()
+async def process_other_answers(message: Message):
+    if user['in_game']:
+        await message.answer(
+            "We're playing with you now. "
+            "Please send numbers from 1 to 100"
+        )
+    else:
+        await message.answer(
+            "I'm a pretty limited bot, come on "
+            "let's just play a game?"
+        )
+
+
+if __name__ == '__main__':
+    dp.run_polling(bot)
