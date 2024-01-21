@@ -52,6 +52,11 @@ dp = Dispatcher()
 
 
 # This handler will check negative numbers in user's messages and make a list from them
+
+
+# This handler will trigger if the user's message
+# starts with the phrase "find the numbers" and has numbers in it
+
 class NumbersInMessage(BaseFilter):
     async def __call__(self, message: Message) -> bool | dict[str, list[int]]:
         numbers = []
@@ -63,9 +68,6 @@ class NumbersInMessage(BaseFilter):
             return {'numbers': numbers}
         return False
 
-
-# This handler will trigger if the user's message
-# starts with the phrase "find the numbers" and has numbers in it
 @dp.message(F.text.lower().startswith('find the numbers'), NumbersInMessage())
 # In addition to the Message type object, we accept a list of numbers from the filter into the handler
 async def process_if_numbers(message: Message, numbers: list[int]):
